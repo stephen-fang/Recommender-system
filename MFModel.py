@@ -12,7 +12,7 @@ import logging, os
 import matplotlib.pyplot as plt
 logging.disable(logging.WARNING)
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-
+from keras.models import load_model
 
 class MFModel:
     def __init__(self, rating_path="dataset/rating.csv"):
@@ -61,6 +61,12 @@ class MFModel:
             [self.train.userId, self.train.movieId], self.train.rating, epochs=500, verbose=0)
 
     def eval(self):
+        # self.train()
+        # try:
+        #     self.model = load_model('models/MFModel.h5')
+        # except:
+        #     self.train()
+        #     self.model.save('models/MFModel.h5')
         self.train()
         # y_hat_2 = np.round(model.predict([test.userId, test.movieId]),0)
         y_test_true = self.test.rating

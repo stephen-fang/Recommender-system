@@ -16,12 +16,16 @@ from keras.utils.vis_utils import model_to_dot
 logging.disable(logging.WARNING)
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+from keras.models import load_model
+
 
 class MLPModel:
-    def __init__(self, rating_path="dataset/rating.csv"):
+    def __init__(self, rating_path="dataset/rating.csv", epochs=25, latent=8, learning_rate=0.005):
         self.rating_path = rating_path
         self.rating = self.read_data()
-
+        self.latent = latent
+        self.learning_rate = learning_rate
+        self.epochs = epochs
     def read_data(self):
         rating = pd.read_csv(self.rating_path)
         # start from 0
@@ -29,7 +33,9 @@ class MLPModel:
         rating.movieId = rating.movieId.astype('category').cat.codes.values
         return rating
 
-    def build_model(self, latent=8, learning_rate=0.005):
+    def build_model(self):
+        latent = self.latent
+        learning_rate = self.learning_rate
         num_users, num_movies = len(
             self.rating.userId.unique()), len(self.rating.movieId.unique())
 
@@ -71,14 +77,20 @@ class MLPModel:
 
     def train(self, ts=0.2):
         self.build_model()
+        epch = self.epochs
         self.train, self.test = train_test_split(self.rating, test_size=ts)
         self.history = self.model.fit(
-            [self.train.userId, self.train.movieId], self.train.rating, epochs=40, verbose=0)
+            [self.train.userId, self.train.movieId], self.train.rating, epochs=epch, verbose=0)
 
     def eval(self):
+        # try:
+        #     self.model = load_model('models/MLPModel.h5')
+        # except:
+        #     self.train()
+        #     self.model.save('models/MLPModel.h5')
         self.train()
         # y_hat_2 = np.round(model.predict([test.userId, test.movieId]),0)
-
+        self.train, self.test = train_test_split(self.rating, test_size=0.2)
         y_test_true = self.test.rating
         y_test_hat = self.model.predict([self.test.userId, self.test.movieId])
         err = np.sqrt(mean_squared_error(y_test_true, y_test_hat))
