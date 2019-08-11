@@ -90,7 +90,7 @@ class MLPModel:
         #     self.model.save('models/MLPModel.h5')
         self.train()
         # y_hat_2 = np.round(model.predict([test.userId, test.movieId]),0)
-        self.train, self.test = train_test_split(self.rating, test_size=0.2)
+        # self.train, self.test = train_test_split(self.rating, test_size=0.2)
         y_test_true = self.test.rating
         y_test_hat = self.model.predict([self.test.userId, self.test.movieId])
         err = np.sqrt(mean_squared_error(y_test_true, y_test_hat))

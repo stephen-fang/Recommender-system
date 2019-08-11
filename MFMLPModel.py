@@ -121,7 +121,7 @@ class MFMLPModel:
         #     self.train()
         #     self.model.save('models/MFMLPModel.h5')
         self.train()
-        self.train, self.test = train_test_split(self.rating, test_size=0.2)
+        # self.train, self.test = train_test_split(self.rating, test_size=0.2)
         # y_hat_2 = np.round(model.predict([test.userId, test.movieId]),0)
 
         y_test_true = self.test.rating
