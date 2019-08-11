@@ -33,35 +33,41 @@ class MLPModel:
         num_users, num_movies = len(
             self.rating.userId.unique()), len(self.rating.movieId.unique())
 
-        user_input = keras.layers.Input(shape=[1, ])
+        user_input = keras.layers.Input(shape=[1, ], name='User')
         user_embedding = keras.layers.Embedding(
-            num_users + 1, latent)(user_input)
+            num_users + 1, latent, name='user_embedding')(user_input)
         user_vec = keras.layers.Flatten()(user_embedding)
         user_vec = keras.layers.Dropout(0.2)(user_vec)
 
-        movie_input = keras.layers.Input(shape=[1, ])
+        movie_input = keras.layers.Input(shape=[1, ], name='Item')
         movie_embedding = keras.layers.Embedding(
-            num_movies + 1, latent)(movie_input)
+            num_movies + 1, latent, name='movie_embedding')(movie_input)
         movie_vec = keras.layers.Flatten()(movie_embedding)
         movie_vec = keras.layers.Dropout(0.2)(movie_vec)
 
-        concat = concatenate([movie_vec, user_vec], axis=-1)
+        concat = concatenate([movie_vec, user_vec], axis=-1, name='concat')
 
         concat = keras.layers.Dropout(0.2)(concat)
-        output = keras.layers.Dense(256)(concat)
-        output = keras.layers.BatchNormalization()(output)
+        output = keras.layers.Dense(256, name='FullyConnected_1')(concat)
+        output = keras.layers.BatchNormalization(name='Batch_1')(output)
 
-        output = keras.layers.Dropout(0.2)(output)
-        output = keras.layers.Dense(128)(output)
-        output = keras.layers.BatchNormalization()(output)
+        output = keras.layers.Dropout(0.2, name='Dropout_1')(output)
+        output = keras.layers.Dense(128, name='FullyConnected_2')(output)
+        output = keras.layers.BatchNormalization(name='Batch_2')(output)
 
-        output = keras.layers.Dropout(0.3)(output)
-        output = keras.layers.Dense(64)(output)
-        output = keras.layers.Dense(16, activation='relu')(output)
+        output = keras.layers.Dropout(0.3, name='Dropout_2')(output)
+        output = keras.layers.Dense(64, name='FullyConnected_3')(output)
+        output = keras.layers.Dense(
+            16, name='FullyConnected_4', activation='relu')(output)
+
+        #pred_mf = keras.layers.merge([movie_vec_mf, user_vec_mf], mode='dot',name='Dot')
+
         pred = keras.layers.Dense(
             1, activation='relu', name='Activation')(output)
 
-        result = keras.layers.Dense(128)(pred)
+        #combine_mlp_mf = keras.layers.merge([pred_mf, pred_mlp], mode='concat',name='Concat-MF-MLP')
+
+        result = keras.layers.Dense(128, name='FullyConnected_5')(pred)
 
         result = keras.layers.Dense(1, name='Prediction')(result)
 
@@ -88,11 +94,10 @@ class MLPModel:
         pd.Series(self.history.history['loss']).plot(logy=True)
         plt.xlabel("Epoch")
         plt.ylabel("Train Error")
+    
+    def get_graph(self):
+        self.svg = SVG(model_to_dot(model,  show_shapes=False, show_layer_names=True, rankdir='HB').create(prog='dot', format='svg'))
 
-    # def get_graph(self):
-    #     self.svg = SVG(model_to_dot(model,  show_shapes=False,
-    #                                 show_layer_names=True, rankdir='HB').create(prog='dot', format='svg'))
-    #     return self.svg
 
 # M = MLPModel()
 # M.eval()

@@ -8,10 +8,8 @@ from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from keras import optimizers
-import warnings
-warnings.filterwarnings('ignore')
 import logging, os
-
+import matplotlib.pyplot as plt
 logging.disable(logging.WARNING)
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
@@ -60,17 +58,22 @@ class MFModel:
         self.build_model()
         self.train, self.test = train_test_split(self.rating, test_size=ts)
         self.history = self.model.fit(
-            [self.train.userId, self.train.movieId], self.train.rating, epochs=100, verbose=0)
+            [self.train.userId, self.train.movieId], self.train.rating, epochs=500, verbose=0)
 
     def eval(self):
         self.train()
         # y_hat_2 = np.round(model.predict([test.userId, test.movieId]),0)
         y_test_true = self.test.rating
-        y_test_hat = np.round(self.model.predict(
-            [self.test.userId, self.test.movieId]), 0)
+        y_test_hat = self.model.predict([self.test.userId, self.test.movieId])
         err = np.sqrt(mean_squared_error(y_test_true, y_test_hat))
         print(f'MF model test err = {err}')
+    
+    def pplot(self):
+        pd.Series(self.history.history['loss']).plot(logy=True)
+        plt.xlabel("Epoch")
+        plt.ylabel("Train Error")
 
+   
+# M = MFModel()
+# M.eval()
 
-M = MFModel()
-M.eval()

@@ -56,6 +56,8 @@ class MemoryBCF:
         pred = self.predict(self.rating_train_M, sim)
         rmse_val = self.rmse(pred, self.rating_test_M)
         return rmse_val
+    def eval(self):
+        pass
 
 
 rating_path = 'dataset/rating.csv'
